@@ -1,0 +1,84 @@
+name: Quiz 自動判定
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 変更された students ファイルを検出
+        id: find
+        run: |
+          CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} \
+            | grep '^students/[0-9]\+/index\.html' | head -1)
+          if [ -z "$CHANGED" ]; then
+            echo "::error::students/{番号}/index.html が見つかりません。正しいフォルダに解答を置いてください。"
+            exit 1
+          fi
+          echo "student_file=$CHANGED" >> $GITHUB_OUTPUT
+          echo "対象ファイル: $CHANGED"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: |
+          npm install -D @playwright/test
+          npx playwright install chromium --with-deps
+
+      - name: Run quiz test
+        id: quiz
+        env:
+          STUDENT_FILE: ${{ steps.find.outputs.student_file }}
+        run: |
+          if npx playwright test; then
+            echo "passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "passed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: PR にコメントを投稿
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const passed = '${{ steps.quiz.outputs.passed }}' === 'true';
+            const file = '${{ steps.find.outputs.student_file }}';
+
+            const body = passed
+              ? [
+                  '## ✅ 合格！',
+                  '',
+                  `**${file}** のボタンクリックで **氏名・学校名・電話番号** が正しく表示されました。`,
+                  'お疲れ様でした！',
+                ].join('\n')
+              : [
+                  '## ❌ 不合格',
+                  '',
+                  `**${file}** のボタンをクリックしても、正しく結果が表示されませんでした。`,
+                  '',
+                  '**確認ポイント**',
+                  '- `button` クリックイベントは設定されていますか？',
+                  '- `.result` 内に `<ul>` を追加していますか？',
+                  '- 氏名・学校名・電話番号をそれぞれ `<li>` に入れていますか？',
+                  '- jQueryを使う場合、`$(function(){})` の中に書いていますか？',
+                  '',
+                  'コードを修正して再度 push してください。',
+                ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
