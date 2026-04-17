@@ -3,3 +3,4 @@ package.json
 package-lock.json
 test-results/
 .claude/
+.DS_Store
