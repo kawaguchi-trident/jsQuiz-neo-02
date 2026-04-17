@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>jsQuiz02</title>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1>申し込みフォーム</h1>
+      <form>
+        <label for="yourN">氏名：<input type="text" value="十来 電人" id="yourN" /></label>
+        <label for="schoolN">学校名：<input type="text" value="トライデントコンピュータ専門学校" id="schoolN" /></label>
+        <label for="telN">電話番号：<input type="tel" value="052-581-0581" id="telN" /></label>
+        <button type="button">送信</button>
+      </form>
+      <h2>結果</h2>
+      <div class="result"></div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script>
+      //ここに書いてください。
+      const button = document.querySelector('button');
+      const result = document.querySelector('.result');
+      button.addEventListener('click', () => {
+        const yourN = document.querySelector('#yourN').value;
+        const schoolN = document.querySelector('#schoolN').value;
+        const telN = document.querySelector('#telN').value;
+        result.innerHTML = `<ul>
+          <li>${yourN}</li>
+          <li>${schoolN}</li>
+          <li>${telN}</li>
+        </ul>`;
+      });
+    </script>
+  </body>
+</html>
