@@ -34,6 +34,18 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script>
       //ここに書いてください。
+      const button = document.querySelector('button');
+      const result = document.querySelector('.result');
+      button.addEventListener('click', () => {
+        const yourN = document.querySelector('#yourN').value;
+        const schoolN = document.querySelector('#schoolN').value;
+        const telN = document.querySelector('#telN').value;
+        result.innerHTML = `<ul>
+          <li>${yourN}</li>
+          <li>${schoolN}</li>
+          <li>${telN}</li>
+        </ul>`;
+      });
     </script>
   </body>
 </html>
