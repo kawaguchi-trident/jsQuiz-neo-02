@@ -6,8 +6,6 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
-  issues: write
 
 jobs:
   check:
@@ -23,64 +21,54 @@ jobs:
         run: |
           CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} \
             | grep '^students/[0-9]\+/index\.html' | head -1)
+          echo "student_file=$CHANGED" >> "$GITHUB_OUTPUT"
           if [ -z "$CHANGED" ]; then
-            echo "::error::students/{番号}/index.html が見つかりません。正しいフォルダに解答を置いてください。"
-            exit 1
+            echo "::warning::students/{番号}/index.html が見つかりません。"
+          else
+            echo "対象ファイル: $CHANGED"
           fi
-          echo "student_file=$CHANGED" >> $GITHUB_OUTPUT
-          echo "対象ファイル: $CHANGED"
 
       - uses: actions/setup-node@v4
+        if: steps.find.outputs.student_file != ''
         with:
           node-version: '20'
 
       - name: Install Playwright
+        if: steps.find.outputs.student_file != ''
         run: |
           npm install -D @playwright/test
           npx playwright install chromium --with-deps
 
       - name: Run quiz test
         id: quiz
+        if: steps.find.outputs.student_file != ''
+        continue-on-error: true
         env:
           STUDENT_FILE: ${{ steps.find.outputs.student_file }}
+        run: npx playwright test
+
+      - name: 結果を artifact に書き出し
+        if: always()
         run: |
-          if npx playwright test; then
-            echo "passed=true" >> $GITHUB_OUTPUT
+          mkdir -p quiz-result
+          echo "${{ github.event.pull_request.number }}" > quiz-result/pr_number.txt
+          echo "${{ steps.find.outputs.student_file }}" > quiz-result/student_file.txt
+          if [ -z "${{ steps.find.outputs.student_file }}" ]; then
+            echo "no_file" > quiz-result/result.txt
+          elif [ "${{ steps.quiz.outcome }}" = "success" ]; then
+            echo "passed" > quiz-result/result.txt
           else
-            echo "passed=false" >> $GITHUB_OUTPUT
+            echo "failed" > quiz-result/result.txt
           fi
 
-      - name: PR にコメントを投稿
-        uses: actions/github-script@v7
+      - name: Artifact をアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            const passed = '${{ steps.quiz.outputs.passed }}' === 'true';
-            const file = '${{ steps.find.outputs.student_file }}';
+          name: quiz-result
+          path: quiz-result/
+          retention-days: 1
 
-            const body = passed
-              ? [
-                  '## ✅ 合格！',
-                  '',
-                  `**${file}** のボタンクリックで **氏名・学校名・電話番号** が正しく表示されました。`,
-                  'お疲れ様でした！',
-                ].join('\n')
-              : [
-                  '## ❌ 不合格',
-                  '',
-                  `**${file}** のボタンをクリックしても、正しく結果が表示されませんでした。`,
-                  '',
-                  '**確認ポイント**',
-                  '- `button` クリックイベントは設定されていますか？',
-                  '- `.result` 内に `<ul>` を追加していますか？',
-                  '- 氏名・学校名・電話番号をそれぞれ `<li>` に入れていますか？',
-                  '- jQueryを使う場合、`$(function(){})` の中に書いていますか？',
-                  '',
-                  'コードを修正して再度 push してください。',
-                ].join('\n');
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body,
-            });
+      - name: PR ステータスに合否を反映
+        if: steps.find.outputs.student_file == '' || steps.quiz.outcome == 'failure'
+        run: exit 1
