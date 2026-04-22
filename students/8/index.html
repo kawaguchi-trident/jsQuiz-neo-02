@@ -49,7 +49,23 @@
     //   ※ 引数は payment の1つだけ。
     //   ※ 関数の中で #total の値を Number() で取得して使うこと。
     //   ※ $(function(){}) の外（グローバル）に定義すること。
-    const total = document.querySelector(".total");
+    const payment = document.querySelector("#payment");
+    const calcChange = (payment) => {
+      const total = document.querySelector("#total");
+      const totalValue = Number(total.value);
+
+      return paymentValue - totalValue;
+    };
+
+    const button = document.querySelector("button");
+    const result = document.querySelector(".result");
+
+    button.addEventListener("click", () => {
+      const paymentValue = Number(payment.value);
+      const change = calcChange(paymentValue);
+
+      result.textContent = `お釣りは${change}円です`;
+    });
 
     // ボタンクリック時に calcChange を呼び出し、.result に以下を表示:
     //   「お釣りは〇〇円です」
