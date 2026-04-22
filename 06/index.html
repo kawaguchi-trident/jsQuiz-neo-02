@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jsQuiz02 - お釣り計算</title>
+  <style>
+    label {
+      display: block;
+      margin-bottom: 10px;
+
+      input {
+        width: 160px;
+        margin-left: 10px;
+        padding: 4px;
+      }
+    }
+
+    button {
+      width: 120px;
+    }
+
+    .result {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <h1>お釣り計算</h1>
+    <form onsubmit="return false;">
+      <label for="payment">支払い金額：<input type="number" id="payment" /> 円</label>
+      <label for="total">商品合計：<input type="number" id="total" value="180" /> 円</label>
+      <button type="button">計算する</button>
+    </form>
+    <h2>結果</h2>
+    <div class="result"></div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script>
+    // ここに書いた JavaScript を、あなたの students/{学籍番号}/index.html にコピーして提出してください。
+    //
+    // 作成する関数:
+    //   calcChange(payment) … お釣り（= payment - #total の値）を返す。
+    //   ※ 引数は payment の1つだけ。
+    //   ※ 関数の中で #total の値を Number() で取得して使うこと。
+    //   ※ $(function(){}) の外（グローバル）に定義すること。
+    //
+    // ボタンクリック時に calcChange を呼び出し、.result に以下を表示:
+    //   「お釣りは〇〇円です」
+
+    const payment = document.querySelector('#payment');
+    const total = document.querySelector('#total');
+    const btn = document.querySelector('button')
+
+    function calcChange(payment) {
+      const total = Number(document.querySelector('#total').value);
+      return payment - total;
+    }
+
+    btn.addEventListener('click', function () {
+      const result = calcChange(Number(payment.value));
+      document.querySelector('.result').textContent = `お釣りは${result}円です。`
+    })
+  </script>
+</body>
+<!-- </html>　 -->
