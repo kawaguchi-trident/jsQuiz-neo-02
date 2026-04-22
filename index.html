@@ -44,7 +44,16 @@
       //   ※ 関数の中で #total の値を Number() で取得して使うこと。
       //   ※ $(function(){}) の外（グローバル）に定義すること。
       //
-      // ボタンクリック時に calcChange を呼び出し、.result に以下を表示:
+
+      function calcChange(payment) {
+          const total = Number($("#total").val());
+          return payment - total;
+
+          const result = Number (total-payment);
+          return result;
+        };
+
+        const Btn=document.querySelector      // ボタンクリック時に calcChange を呼び出し、.result に以下を表示:
       //   「お釣りは〇〇円です」
     </script>
   </body>
