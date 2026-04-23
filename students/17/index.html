@@ -43,17 +43,22 @@
     integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
   <script>
     // ここに書いた JavaScript を、あなたの students/{学籍番号}/index.html にコピーして提出してください。
-
-    const total = document.querySelector('#total');
-    const payment = document.querySelector('#payment');
     const calcChange = function (payment) {
-      return payment - Number(total.value);
-    }
-    const button = document.querySelector('button');
-    const result = document.querySelector('.result');
-    button.addEventListener('click', function () {
-      const change = calcChange(Number(payment.value));
-      result.textContent = 'お釣りは' + change + '円です。';
+      const total = Number(document.querySelector('#total').value);
+      return payment - total;
+    };
+
+    $(function () {
+      const button = document.querySelector('button');
+      const result = document.querySelector('.result');
+
+      button.addEventListener('click', function () {
+        const payment = Number(document.querySelector('#payment').value);
+
+        const change = calcChange(payment);
+
+        result.textContent = 'お釣りは' + change + '円です。';
+      });
     });
     //
     // 作成する関数:
