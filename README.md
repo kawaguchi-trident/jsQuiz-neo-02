@@ -109,4 +109,4 @@ jsQuiz-neo-02/
 
 ## 模範解答
 
-授業資料の一番下に、リンクがあります。
+授業資料内の[JSQuiz_neo模範解答](https://2026doc.hideok.org/first-term/javascript/post-quizanswer)
